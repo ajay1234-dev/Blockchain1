@@ -37,17 +37,31 @@ app.use(limiter);
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // limit each IP to 5 login/register attempts per windowMs
-  message: "Too many authentication attempts, please try again later",
+  message: {
+    error: "Too many authentication attempts",
+    message: "Too many authentication attempts, please try again later",
+    statusCode: 429,
+  },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res, options) => {
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 const walletLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // limit each IP to 10 wallet link attempts per windowMs
-  message: "Too many wallet link attempts, please try again later",
+  message: {
+    error: "Too many wallet link attempts",
+    message: "Too many wallet link attempts, please try again later",
+    statusCode: 429,
+  },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res, options) => {
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 // Apply specific rate limiters to sensitive routes

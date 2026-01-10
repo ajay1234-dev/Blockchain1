@@ -15,11 +15,11 @@ function initializeApp() {
   try {
     // Clean up the private key by replacing literal \n with actual newlines
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    if (privateKey && typeof privateKey === 'string') {
+    if (privateKey && typeof privateKey === "string") {
       // Handle different possible encodings
       privateKey = privateKey.replace(/\\n/g, "\n");
       // Also handle cases where there might be URL encoding
-      if (privateKey.includes('%')) {
+      if (privateKey.includes("%")) {
         privateKey = decodeURIComponent(privateKey);
       }
     }
@@ -41,15 +41,15 @@ function initializeApp() {
 
     // Validate the service account object
     if (!serviceAccount.private_key) {
-      throw new Error('Private key is missing or invalid');
+      throw new Error("Private key is missing or invalid");
     }
 
     if (!serviceAccount.client_email) {
-      throw new Error('Client email is missing');
+      throw new Error("Client email is missing");
     }
 
     if (!serviceAccount.project_id) {
-      throw new Error('Project ID is missing');
+      throw new Error("Project ID is missing");
     }
 
     if (admin.apps.length === 0) {
@@ -65,15 +65,24 @@ function initializeApp() {
     console.error("Firebase initialization failed:", error.message);
     console.error("Error code:", error.code);
     // Provide more specific guidance based on error type
-    if (error.message.includes('invalid_grant') || error.message.includes('JWT Signature')) {
+    if (
+      error.message.includes("invalid_grant") ||
+      error.message.includes("JWT Signature")
+    ) {
       console.error("\n=== FIREBASE CONFIGURATION ISSUE ===");
       console.error("The Firebase service account key appears to be invalid.");
       console.error("Possible causes and solutions:");
-      console.error("1. The service account key has been revoked - regenerate the key");
-      console.error("2. The system time is not synchronized - sync your system time");
+      console.error(
+        "1. The service account key has been revoked - regenerate the key"
+      );
+      console.error(
+        "2. The system time is not synchronized - sync your system time"
+      );
       console.error("3. The private key is malformed - copy the key correctly");
       console.error("\nTo fix this issue:");
-      console.error("1. Go to Firebase Console > Project Settings > Service Accounts");
+      console.error(
+        "1. Go to Firebase Console > Project Settings > Service Accounts"
+      );
       console.error("2. Generate a new private key and download the JSON file");
       console.error("3. Copy the values from the JSON file to your .env file");
       console.error("===================================\n");
