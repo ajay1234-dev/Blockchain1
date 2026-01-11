@@ -1,6 +1,24 @@
-const { getFirestore, getAuth } = require("../config/firebase");
+const { firestore, auth } = require("../config/firebaseAdmin");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
+// Function to check if Firebase services are available
+const checkFirebaseAvailability = async () => {
+  try {
+    // Test Firestore connectivity by trying to access a simple collection
+    await firestore.collection("health-check").limit(1).get();
+
+    // Test Authentication connectivity by verifying the admin SDK is initialized
+    if (!auth) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Firebase availability check failed:", error);
+    return false;
+  }
+};
 
 const register = async (req, res) => {
   try {
@@ -21,23 +39,37 @@ const register = async (req, res) => {
       });
     }
 
+    // Check if Firebase services are available
+    const isFirebaseAvailable = await checkFirebaseAvailability();
+    if (!isFirebaseAvailable) {
+      return res.status(503).json({
+        message:
+          "Authentication service temporarily unavailable. Please try again later.",
+      });
+    }
+
     // Check if user already exists in Firebase Auth
     try {
-      await getAuth().getUserByEmail(email);
+      await auth.getUserByEmail(email);
       return res.status(400).json({ message: "User already exists" });
     } catch (error) {
       // User doesn't exist, continue with registration
     }
 
     // Create user in Firebase Auth
-    const userRecord = await getAuth().createUser({
-      email,
-      password,
-      displayName: name,
-    });
+    let userRecord;
+    try {
+      userRecord = await auth.createUser({
+        email,
+        password,
+        displayName: name,
+      });
+    } catch (authError) {
+      console.error("Firebase Auth error during registration:", authError);
+      return res.status(500).json({ message: "Failed to create user account" });
+    }
 
     // Create user profile in Firestore
-    const firestore = getFirestore();
 
     // Validate wallet address format if provided
     let validatedWalletAddress = null;
@@ -62,11 +94,16 @@ const register = async (req, res) => {
       });
     } catch (firestoreError) {
       console.error("Firestore error during registration:", firestoreError);
-      // If Firestore fails, we can still proceed with the registration but log the error
-      console.warn(
-        "Failed to create user profile in Firestore, but user was created in Auth:",
-        firestoreError.message
-      );
+      // If Firestore fails, delete the user from auth to prevent orphaned records
+      try {
+        await auth.deleteUser(userRecord.uid);
+      } catch (cleanupError) {
+        console.error(
+          "Failed to cleanup user after Firestore error:",
+          cleanupError
+        );
+      }
+      return res.status(500).json({ message: "Failed to create user profile" });
     }
 
     // Create a JWT token for the new user
@@ -111,11 +148,9 @@ const login = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    // In a real implementation, you would verify credentials with Firebase Auth
-    // For now, we'll create a custom token after verifying the user exists
     let userRecord;
     try {
-      userRecord = await getAuth().getUserByEmail(email);
+      userRecord = await auth.getUserByEmail(email);
     } catch (error) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -123,7 +158,6 @@ const login = async (req, res) => {
     // Get user profile from Firestore
     let userProfile = {};
     try {
-      const firestore = getFirestore();
       const userDoc = await firestore
         .collection("users")
         .doc(userRecord.uid)
@@ -133,11 +167,7 @@ const login = async (req, res) => {
         userProfile = userDoc.data();
       }
     } catch (firestoreError) {
-      // If Firestore access fails, continue with just Firebase Auth data
-      console.warn(
-        "Firestore access failed, using auth data only:",
-        firestoreError.message
-      );
+      console.error("Error getting user profile:", firestoreError);
       // Ensure we have default values
       userProfile = { role: null, walletAddress: null };
     }

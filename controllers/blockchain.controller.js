@@ -1,4 +1,4 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 const {
   getTokenBalance,
   transferTokens,
@@ -28,12 +28,10 @@ const getWalletBalance = async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting wallet balance:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error retrieving wallet balance",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error retrieving wallet balance",
+      error: error.message,
+    });
   }
 };
 
@@ -67,7 +65,6 @@ const initiateTokenTransfer = async (req, res) => {
     const tx = await transferTokens(to, amount);
 
     // Log the transaction in Firestore
-    const firestore = getFirestore();
     await firestore.collection("transactions").add({
       from: user.walletAddress,
       to,
@@ -103,18 +100,15 @@ const createDisasterEvent = async (req, res) => {
     const admin = req.currentUser;
 
     if (!name || !description) {
-      return res
-        .status(400)
-        .json({
-          message: "Name and description are required for disaster event",
-        });
+      return res.status(400).json({
+        message: "Name and description are required for disaster event",
+      });
     }
 
     const managerContract = getManagerContract();
 
     // In a real implementation, this would call the smart contract
     // For now, we'll simulate the creation in Firestore
-    const firestore = getFirestore();
     const disasterDoc = await firestore.collection("disasters").add({
       name,
       description,
@@ -148,8 +142,6 @@ const approveBeneficiary = async (req, res) => {
         .status(400)
         .json({ message: "Beneficiary ID and Event ID are required" });
     }
-
-    const firestore = getFirestore();
 
     // Check if beneficiary exists
     const beneficiaryDoc = await firestore
@@ -210,8 +202,6 @@ const approveVendor = async (req, res) => {
         .status(400)
         .json({ message: "Vendor ID and Event ID are required" });
     }
-
-    const firestore = getFirestore();
 
     // Check if vendor exists
     const vendorDoc = await firestore.collection("users").doc(vendorId).get();

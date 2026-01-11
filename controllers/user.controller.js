@@ -1,8 +1,7 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore, auth } = require("../config/firebaseAdmin");
 
 const getCurrentUser = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const userDoc = await firestore.collection("users").doc(req.user.uid).get();
 
     if (!userDoc.exists) {
@@ -31,7 +30,6 @@ const getCurrentUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, walletAddress } = req.body;
-    const firestore = getFirestore();
 
     const userRef = firestore.collection("users").doc(req.user.uid);
     const userDoc = await userRef.get();
@@ -82,7 +80,6 @@ const updateUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const usersSnapshot = await firestore.collection("users").get();
 
     const users = [];
@@ -110,7 +107,6 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const firestore = getFirestore();
     const userDoc = await firestore.collection("users").doc(id).get();
 
     if (!userDoc.exists) {
@@ -144,14 +140,10 @@ const updateUserRole = async (req, res) => {
     // Validate role
     const validRoles = ["admin", "donor", "beneficiary", "vendor"];
     if (!validRoles.includes(role)) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid role. Must be admin, donor, beneficiary, or vendor",
-        });
+      return res.status(400).json({
+        message: "Invalid role. Must be admin, donor, beneficiary, or vendor",
+      });
     }
-
-    const firestore = getFirestore();
     const userRef = firestore.collection("users").doc(id);
     const userDoc = await userRef.get();
 

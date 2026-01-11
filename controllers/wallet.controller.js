@@ -1,4 +1,4 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 const { ethers } = require("ethers");
 
 const linkWallet = async (req, res) => {
@@ -27,8 +27,6 @@ const linkWallet = async (req, res) => {
       return res.status(400).json({ message: "Signature verification failed" });
     }
 
-    const firestore = getFirestore();
-
     // Check if wallet is already linked to another user
     const existingUserSnapshot = await firestore
       .collection("users")
@@ -37,11 +35,9 @@ const linkWallet = async (req, res) => {
       .get();
 
     if (!existingUserSnapshot.empty) {
-      return res
-        .status(400)
-        .json({
-          message: "Wallet address is already linked to another account",
-        });
+      return res.status(400).json({
+        message: "Wallet address is already linked to another account",
+      });
     }
 
     // Update user's wallet address in Firestore
@@ -77,8 +73,6 @@ const linkWallet = async (req, res) => {
 const getWalletInfo = async (req, res) => {
   try {
     const userId = req.user.uid;
-    const firestore = getFirestore();
-
     const userDoc = await firestore.collection("users").doc(userId).get();
 
     if (!userDoc.exists) {

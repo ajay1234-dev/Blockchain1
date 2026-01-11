@@ -1,4 +1,4 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 
 const logTransaction = async (req, res) => {
   try {
@@ -13,8 +13,6 @@ const logTransaction = async (req, res) => {
           "Transaction hash, from address, to address, amount, and purpose are required",
       });
     }
-
-    const firestore = getFirestore();
 
     // Create transaction log
     const transactionLog = {
@@ -50,7 +48,6 @@ const logTransaction = async (req, res) => {
 const getUserTransactionHistory = async (req, res) => {
   try {
     const userId = req.user.uid;
-    const firestore = getFirestore();
 
     const transactionsSnapshot = await firestore
       .collection("transactions")
@@ -81,8 +78,6 @@ const getUserTransactionHistory = async (req, res) => {
 
 const getAdminTransactionAudit = async (req, res) => {
   try {
-    const firestore = getFirestore();
-
     const transactionsSnapshot = await firestore
       .collection("transactions")
       .orderBy("timestamp", "desc")

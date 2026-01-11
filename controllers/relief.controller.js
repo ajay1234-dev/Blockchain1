@@ -1,9 +1,8 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 
 // Get relief for beneficiary
 const getReliefForBeneficiary = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const userId = req.user.uid;
 
     // Get approved beneficiaries for this user
@@ -60,12 +59,10 @@ const getReliefByCategory = async (req, res) => {
     res.status(200).json(categories);
   } catch (error) {
     console.error("Error fetching relief categories:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching relief categories",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching relief categories",
+      error: error.message,
+    });
   }
 };
 

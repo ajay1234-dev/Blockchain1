@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-const firebaseConfig = require("./config/firebase");
+const firebaseConfig = require("./config/firebaseAdmin");
 const ethereumConfig = require("./config/ethereum");
 require("./controllers/firebase.controller");
 
@@ -77,7 +77,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 // Initialize Firebase
-firebaseConfig.initializeApp();
 
 // Initialize Ethereum
 ethereumConfig.initializeEthereum();

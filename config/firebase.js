@@ -2,6 +2,9 @@ const admin = require("firebase-admin");
 
 let firebaseInitialized = false;
 
+// Initialize the global variable
+global.firebaseInitialized = false;
+
 function initializeApp() {
   // Check if required environment variables are set
   if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY) {
@@ -60,6 +63,7 @@ function initializeApp() {
     }
 
     firebaseInitialized = true;
+    global.firebaseInitialized = true;
     console.log("Firebase initialized");
   } catch (error) {
     console.error("Firebase initialization failed:", error.message);
@@ -88,6 +92,7 @@ function initializeApp() {
       console.error("===================================\n");
     }
     firebaseInitialized = false;
+    global.firebaseInitialized = false;
   }
 }
 

@@ -1,10 +1,9 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 const { transferTokens } = require("../config/ethereum");
 
 // Get all donations
 const getDonations = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const donationsSnapshot = await firestore.collection("donations").get();
 
     const donations = [];
@@ -27,7 +26,6 @@ const getDonations = async (req, res) => {
 // Get donor's donations
 const getDonorDonations = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const userId = req.user.uid;
     const donationsSnapshot = await firestore
       .collection("donations")
@@ -63,8 +61,6 @@ const createDonation = async (req, res) => {
         .status(400)
         .json({ message: "Disaster ID, amount, and currency are required" });
     }
-
-    const firestore = getFirestore();
 
     // Get disaster info
     const disasterDoc = await firestore

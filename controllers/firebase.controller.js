@@ -1,9 +1,7 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 
 // Auto-create collections by ensuring they exist
 const ensureCollections = async () => {
-  const firestore = getFirestore();
-
   // Create sample documents to ensure collections exist
   const collections = [
     "users",

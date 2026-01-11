@@ -1,9 +1,8 @@
-const { getFirestore } = require("../config/firebase");
+const { firestore } = require("../config/firebaseAdmin");
 
 // Get all disasters
 const getDisasters = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const disastersSnapshot = await firestore.collection("disasters").get();
 
     const disasters = [];
@@ -26,7 +25,6 @@ const getDisasters = async (req, res) => {
 // Get active disasters
 const getActiveDisasters = async (req, res) => {
   try {
-    const firestore = getFirestore();
     const disastersSnapshot = await firestore
       .collection("disasters")
       .where("status", "==", "active")
@@ -43,12 +41,10 @@ const getActiveDisasters = async (req, res) => {
     res.status(200).json(disasters);
   } catch (error) {
     console.error("Error fetching active disasters:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching active disasters",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching active disasters",
+      error: error.message,
+    });
   }
 };
 
