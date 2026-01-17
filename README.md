@@ -1,10 +1,10 @@
 # Emergency Relief Blockchain Platform
 
-A full-stack web application for emergency and disaster relief using Blockchain (Ethereum) and Firebase, where donors, admins, beneficiaries, and vendors interact through a transparent and secure system.
+A full-stack web application for emergency and disaster relief using Blockchain (Ethereum) and Firebase, where donors, admins, and beneficiaries interact through a transparent and secure system.
 
 ## Features
 
-- **Role-based access control**: Admin, Donor, Beneficiary, and Vendor roles
+- **Role-based access control**: Admin, Donor, and Beneficiary roles
 - **Blockchain integration**: Ethereum-based transactions with ethers.js
 - **Firebase authentication**: Secure user authentication and authorization
 - **Responsive UI**: Modern dashboard-based interface with Tailwind CSS
@@ -150,7 +150,6 @@ project-root/
 - **Admin**: Full access to user management and system settings
 - **Donor**: Can make donations and view donation history
 - **Beneficiary**: Can request assistance and view received aid
-- **Vendor**: Can provide services and manage contracts
 
 ## Security Features
 

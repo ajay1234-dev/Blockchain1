@@ -115,11 +115,11 @@ const DonorDashboard = ({ user }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-md p-6 border border-blue-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-blue-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl text-white shadow-lg shadow-blue-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -135,18 +135,18 @@ const DonorDashboard = ({ user }) => {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Total Donations
               </h3>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
                 ${donations.reduce((sum, d) => sum + d.amount, 0).toFixed(2)}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-md p-6 border border-green-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-green-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl text-white shadow-lg shadow-emerald-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -162,18 +162,18 @@ const DonorDashboard = ({ user }) => {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Active Campaigns
               </h3>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                 {disasters.length}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-md p-6 border border-purple-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-purple-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white shadow-lg shadow-purple-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -189,10 +189,10 @@ const DonorDashboard = ({ user }) => {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Blockchain Records
               </h3>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 {donations.length}
               </p>
             </div>
@@ -201,9 +201,9 @@ const DonorDashboard = ({ user }) => {
       </div>
 
       {/* Donation Form */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 border border-gray-100">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white">
+          <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white shadow-lg shadow-emerald-500/20">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -218,17 +218,19 @@ const DonorDashboard = ({ user }) => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-gray-900">Make a Donation</h3>
+          <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Make a Donation
+          </h3>
         </div>
         <form onSubmit={handleDonate} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Select Disaster
             </label>
             <select
               value={selectedDisaster}
               onChange={(e) => setSelectedDisaster(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               required
             >
               <option value="">Select a disaster event</option>
@@ -240,7 +242,7 @@ const DonorDashboard = ({ user }) => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Amount
             </label>
             <input
@@ -248,16 +250,16 @@ const DonorDashboard = ({ user }) => {
               step="0.01"
               value={donationAmount}
               onChange={(e) => setDonationAmount(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               placeholder="Enter donation amount"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Currency
             </label>
-            <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white">
+            <select className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400">
               <option value="ETH">ETH</option>
               <option value="RELIEF">RELIEF Token</option>
             </select>
@@ -265,7 +267,7 @@ const DonorDashboard = ({ user }) => {
           <button
             type="submit"
             disabled={donating}
-            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-500/20 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {donating ? "Processing..." : "Donate Now"}
           </button>
@@ -273,10 +275,10 @@ const DonorDashboard = ({ user }) => {
       </div>
 
       {/* Donation History */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 border border-gray-100">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg text-white">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg text-white shadow-lg shadow-blue-500/20">
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -291,44 +293,44 @@ const DonorDashboard = ({ user }) => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
               Donation History
             </h3>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-400">
             {donations.length} donations
           </div>
         </div>
         {donations.length > 0 ? (
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-xl border border-gray-700/50 bg-gray-800/30">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-800/50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Disaster
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Transaction
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-700">
                 {donations.map((donation, index) => (
                   <tr
                     key={donation.id}
-                    className="hover:bg-gray-50 transition-colors duration-150"
+                    className="transition-colors duration-150 hover:bg-gray-700/30"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-gray-300">
                         {new Date(donation.createdAt).toLocaleDateString()}
                       </div>
                       <div className="text-sm text-gray-500">
@@ -336,7 +338,7 @@ const DonorDashboard = ({ user }) => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-300">
                         {donation.disasterName}
                       </div>
                       <div className="text-sm text-gray-500">
@@ -344,7 +346,7 @@ const DonorDashboard = ({ user }) => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-300">
                         {donation.amount} {donation.currency}
                       </div>
                       <div className="text-sm text-gray-500">
@@ -356,18 +358,18 @@ const DonorDashboard = ({ user }) => {
                         className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                         ${
                           donation.status === "completed"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                             : donation.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            : "bg-red-500/20 text-red-400 border border-red-500/30"
                         }`}
                       >
                         <span
                           className={`inline-block w-2 h-2 rounded-full mr-2 ${
                             donation.status === "completed"
-                              ? "bg-green-500"
+                              ? "bg-emerald-500"
                               : donation.status === "pending"
-                              ? "bg-yellow-500"
+                              ? "bg-amber-500"
                               : "bg-red-500"
                           }`}
                         ></span>
@@ -378,7 +380,7 @@ const DonorDashboard = ({ user }) => {
                       <div className="flex items-center">
                         {donation.txHash ? (
                           <>
-                            <span className="text-gray-900 mr-2">
+                            <span className="text-gray-300 mr-2">
                               {donation.txHash.substring(0, 6)}...
                               {donation.txHash.substring(
                                 donation.txHash.length - 4
@@ -388,7 +390,7 @@ const DonorDashboard = ({ user }) => {
                               href={`https://sepolia.etherscan.io/tx/${donation.txHash}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-indigo-400 hover:text-indigo-300"
                             >
                               <svg
                                 className="h-4 w-4"
@@ -430,7 +432,7 @@ const DonorDashboard = ({ user }) => {
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+            <h3 className="mt-2 text-sm font-medium text-gray-300">
               No donations
             </h3>
             <p className="mt-1 text-sm text-gray-500">

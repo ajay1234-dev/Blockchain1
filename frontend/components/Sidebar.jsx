@@ -3,12 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   UserGroupIcon,
-  BuildingOfficeIcon,
   WalletIcon,
   CogIcon,
   ChartBarIcon,
   HeartIcon,
-  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 
 const Sidebar = ({ user }) => {
@@ -38,14 +36,13 @@ const Sidebar = ({ user }) => {
         return [
           ...baseItems,
           { name: "Relief", href: "/relief", icon: HeartIcon },
-          { name: "Requests", href: "/requests", icon: WalletIcon },
+          {
+            name: "Request Disaster",
+            href: "/request-disaster",
+            icon: WalletIcon,
+          },
         ];
-      case "vendor":
-        return [
-          ...baseItems,
-          { name: "Services", href: "/services", icon: BuildingOfficeIcon },
-          { name: "Transactions", href: "/transactions", icon: ChartBarIcon },
-        ];
+
       default:
         return baseItems;
     }
@@ -55,10 +52,10 @@ const Sidebar = ({ user }) => {
 
   return (
     <div className="hidden md:flex md:flex-shrink-0">
-      <div className="flex flex-col w-64 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 shadow-sm h-full">
+      <div className="flex flex-col w-64 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-lg border-r border-gray-700/50 h-full">
         <div className="flex flex-col flex-grow pt-6 pb-4 overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-5">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-7 w-7"
@@ -75,10 +72,10 @@ const Sidebar = ({ user }) => {
               </svg>
             </div>
             <div className="ml-3">
-              <span className="text-lg font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 Relief Platform
               </span>
-              <p className="text-xs text-gray-500 -mt-0.5">Blockchain</p>
+              <p className="text-xs text-gray-400 -mt-0.5">Blockchain</p>
             </div>
           </div>
 
@@ -92,15 +89,15 @@ const Sidebar = ({ user }) => {
                     to={item.href}
                     className={`${
                       isActive
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    } group flex items-center px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1.5`}
+                        ? "bg-gradient-to-r from-indigo-600/80 to-purple-600/80 text-white shadow-lg shadow-indigo-500/20"
+                        : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+                    } group flex items-center px-4 py-3.5 text-sm font-medium rounded-lg transition-all duration-200 mb-1.5`}
                   >
                     <item.icon
                       className={`${
                         isActive
                           ? "text-white"
-                          : "text-gray-400 group-hover:text-gray-500"
+                          : "text-gray-400 group-hover:text-white"
                       } mr-3 h-5 w-5 flex-shrink-0`}
                       aria-hidden="true"
                     />
@@ -110,12 +107,12 @@ const Sidebar = ({ user }) => {
               })}
             </nav>
 
-            <div className="mt-auto pt-6 pb-4 px-4 border-t border-gray-200 bg-gradient-to-t from-gray-50 to-white">
+            <div className="mt-auto pt-6 pb-4 px-4 border-t border-gray-700/50 bg-gradient-to-t from-gray-800/50 to-gray-900/50">
               <div className="flex items-center">
                 <div className="relative">
-                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-dashed border-blue-300 rounded-xl w-10 h-10 flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 border border-gray-600/50 rounded-lg w-10 h-10 flex items-center justify-center shadow-inner">
                     <svg
-                      className="h-6 w-6 text-blue-600"
+                      className="h-6 w-6 text-indigo-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -128,16 +125,14 @@ const Sidebar = ({ user }) => {
                       />
                     </svg>
                   </div>
-                  <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                  <span className="absolute -bottom-1 -right-1 bg-emerald-500/80 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-gray-800">
                     {user?.role?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.name}
-                  </p>
+                  <p className="text-sm font-medium text-white">{user?.name}</p>
                   <div className="flex items-center space-x-1.5 mt-0.5">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 capitalize">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 capitalize border border-indigo-500/30">
                       {user?.role}
                     </span>
                   </div>

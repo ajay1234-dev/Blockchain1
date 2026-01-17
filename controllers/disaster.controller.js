@@ -6,12 +6,36 @@ const getDisasters = async (req, res) => {
     const disastersSnapshot = await firestore.collection("disasters").get();
 
     const disasters = [];
-    disastersSnapshot.forEach((doc) => {
+    for (const doc of disastersSnapshot.docs) {
+      const disasterData = doc.data();
+
+      // Get the creator's name if createdBy exists
+      let createdByName = "Unknown";
+      if (disasterData.createdBy) {
+        try {
+          const userDoc = await firestore
+            .collection("users")
+            .doc(disasterData.createdBy)
+            .get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            createdByName = userData.name || userData.email || "Unknown";
+          }
+        } catch (error) {
+          console.error(
+            "Error fetching user data for disaster creator:",
+            error
+          );
+          createdByName = "Unknown";
+        }
+      }
+
       disasters.push({
         id: doc.id,
-        ...doc.data(),
+        ...disasterData,
+        createdBy: createdByName, // Replace UID with name
       });
-    });
+    }
 
     res.status(200).json(disasters);
   } catch (error) {
@@ -31,12 +55,36 @@ const getActiveDisasters = async (req, res) => {
       .get();
 
     const disasters = [];
-    disastersSnapshot.forEach((doc) => {
+    for (const doc of disastersSnapshot.docs) {
+      const disasterData = doc.data();
+
+      // Get the creator's name if createdBy exists
+      let createdByName = "Unknown";
+      if (disasterData.createdBy) {
+        try {
+          const userDoc = await firestore
+            .collection("users")
+            .doc(disasterData.createdBy)
+            .get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            createdByName = userData.name || userData.email || "Unknown";
+          }
+        } catch (error) {
+          console.error(
+            "Error fetching user data for disaster creator:",
+            error
+          );
+          createdByName = "Unknown";
+        }
+      }
+
       disasters.push({
         id: doc.id,
-        ...doc.data(),
+        ...disasterData,
+        createdBy: createdByName, // Replace UID with name
       });
-    });
+    }
 
     res.status(200).json(disasters);
   } catch (error) {

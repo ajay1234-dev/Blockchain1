@@ -77,17 +77,19 @@ const Profile = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-gray-700/50">
         <div className="flex items-center mb-8">
-          <UserCircleIcon className="h-10 w-10 text-indigo-600 mr-3" />
-          <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+          <UserCircleIcon className="h-10 w-10 text-indigo-400 mr-3" />
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            Profile
+          </h1>
         </div>
 
         {editing ? (
           <form onSubmit={handleUpdateProfile} className="space-y-8">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <UserCircleIcon className="h-5 w-5 mr-2 text-indigo-600" />
+              <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <UserCircleIcon className="h-5 w-5 mr-2 text-indigo-400" />
                 Name
               </label>
               <input
@@ -96,14 +98,14 @@ const Profile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm focus:shadow-md"
+                className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm focus:shadow-md text-white"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <WalletIcon className="h-5 w-5 mr-2 text-indigo-600" />
+              <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <WalletIcon className="h-5 w-5 mr-2 text-indigo-400" />
                 Wallet Address
               </label>
               <input
@@ -112,7 +114,7 @@ const Profile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, walletAddress: e.target.value })
                 }
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm focus:shadow-md"
+                className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm focus:shadow-md text-white"
                 placeholder="Enter your Ethereum wallet address"
               />
             </div>
@@ -120,7 +122,7 @@ const Profile = () => {
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-800 transition shadow-md hover:shadow-lg flex items-center"
+                className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-800 transition shadow-md hover:shadow-lg flex items-center"
               >
                 <CheckIcon className="h-5 w-5 mr-2" />
                 Save Changes
@@ -134,7 +136,7 @@ const Profile = () => {
                     walletAddress: user.walletAddress || "",
                   });
                 }}
-                className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition shadow-md hover:shadow-lg flex items-center"
+                className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition shadow-md hover:shadow-lg flex items-center"
               >
                 <XMarkIcon className="h-5 w-5 mr-2" />
                 Cancel
@@ -144,24 +146,24 @@ const Profile = () => {
         ) : (
           <div className="space-y-8">
             <div className="flex items-center space-x-6">
-              <div className="bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full w-20 h-20 flex items-center justify-center">
-                <UserCircleIcon className="h-12 w-12 text-indigo-600" />
+              <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full w-20 h-20 flex items-center justify-center border border-indigo-500/30">
+                <UserCircleIcon className="h-12 w-12 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                   {user?.name}
                 </h2>
-                <p className="text-gray-600 text-lg">{user?.email}</p>
+                <p className="text-gray-400 text-lg">{user?.email}</p>
                 <span
                   className={`inline-block px-4 py-1.5 rounded-full text-sm font-medium mt-2
                   ${
                     user?.role === "admin"
-                      ? "bg-red-100 text-red-800"
+                      ? "bg-red-500/20 text-red-400 border border-red-500/30"
                       : user?.role === "donor"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
                       : user?.role === "beneficiary"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-yellow-100 text-yellow-800"
+                      ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                      : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                   }`}
                 >
                   {user?.role}
@@ -170,41 +172,48 @@ const Profile = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                  <UserCircleIcon className="h-5 w-5 mr-2 text-indigo-600" />
+              <div className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-gray-600/50">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-6 flex items-center">
+                  <UserCircleIcon className="h-5 w-5 mr-2 text-indigo-400" />
                   Personal Information
                 </h3>
                 <div className="space-y-4">
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-600">
+                  <div className="flex justify-between border-b border-gray-700/50 pb-3">
+                    <p className="text-sm font-medium text-gray-400">
                       Full Name
                     </p>
-                    <p className="text-gray-900 font-medium">{user?.name}</p>
+                    <p className="text-gray-300 font-medium">{user?.name}</p>
                   </div>
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-600">Email</p>
-                    <p className="text-gray-900 font-medium">{user?.email}</p>
+                  <div className="flex justify-between border-b border-gray-700/50 pb-3">
+                    <p className="text-sm font-medium text-gray-400">Email</p>
+                    <p className="text-gray-300 font-medium">{user?.email}</p>
                   </div>
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-600">Role</p>
-                    <p className="text-gray-900 font-medium capitalize">
+                  <div className="flex justify-between border-b border-gray-700/50 pb-3">
+                    <p className="text-sm font-medium text-gray-400">Role</p>
+                    <p className="text-gray-300 font-medium capitalize">
                       {user?.role}
                     </p>
                   </div>
-                  <div className="flex justify-between border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-600">
+                  <div className="flex justify-between border-b border-gray-700/50 pb-3">
+                    <p className="text-sm font-medium text-gray-400">
                       Wallet Address
                     </p>
-                    <p className="text-gray-900 font-medium">
-                      {user?.walletAddress || "Not provided"}
+                    <p className="text-gray-300 font-medium text-right break-all max-w-xs">
+                      {user?.walletAddress
+                        ? `${user.walletAddress.substring(
+                            0,
+                            6
+                          )}...${user.walletAddress.substring(
+                            user.walletAddress.length - 4
+                          )}`
+                        : "Not provided"}
                     </p>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-sm font-medium text-gray-600">
+                    <p className="text-sm font-medium text-gray-400">
                       Member Since
                     </p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="text-gray-300 font-medium">
                       {new Date(user?.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -220,7 +229,7 @@ const Profile = () => {
             <div>
               <button
                 onClick={() => setEditing(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-800 transition shadow-md hover:shadow-lg flex items-center"
+                className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-800 transition shadow-md hover:shadow-lg flex items-center"
               >
                 <PencilIcon className="h-5 w-5 mr-2" />
                 Edit Profile

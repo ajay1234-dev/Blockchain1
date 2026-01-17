@@ -52,7 +52,6 @@ const getUserTransactionHistory = async (req, res) => {
     const transactionsSnapshot = await firestore
       .collection("transactions")
       .where("userId", "==", userId)
-      .orderBy("timestamp", "desc")
       .get();
 
     const transactions = [];
@@ -62,6 +61,9 @@ const getUserTransactionHistory = async (req, res) => {
         ...doc.data(),
       });
     });
+
+    // Sort transactions by timestamp in descending order (most recent first)
+    transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     res.status(200).json({
       transactions,
@@ -80,7 +82,6 @@ const getAdminTransactionAudit = async (req, res) => {
   try {
     const transactionsSnapshot = await firestore
       .collection("transactions")
-      .orderBy("timestamp", "desc")
       .limit(100) // Limit for performance
       .get();
 
@@ -91,6 +92,9 @@ const getAdminTransactionAudit = async (req, res) => {
         ...doc.data(),
       });
     });
+
+    // Sort transactions by timestamp in descending order (most recent first)
+    transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     // Get summary statistics
     const summary = {

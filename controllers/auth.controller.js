@@ -2,6 +2,22 @@ const { firestore, auth } = require("../config/firebaseAdmin");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// Function to check if an admin already exists
+const adminExists = async () => {
+  try {
+    const adminSnapshot = await firestore
+      .collection("users")
+      .where("role", "==", "admin")
+      .limit(1)
+      .get();
+
+    return !adminSnapshot.empty;
+  } catch (error) {
+    console.error("Error checking if admin exists:", error);
+    return false; // Default to false if there's an error
+  }
+};
+
 // Function to check if Firebase services are available
 const checkFirebaseAvailability = async () => {
   try {
@@ -32,11 +48,31 @@ const register = async (req, res) => {
     }
 
     // Validate role
-    const validRoles = ["admin", "donor", "beneficiary", "vendor"];
+    const validRoles = ["admin", "donor", "beneficiary"];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
-        message: "Invalid role. Must be admin, donor, beneficiary, or vendor",
+        message: "Invalid role. Must be admin, donor, or beneficiary",
       });
+    }
+
+    // Enforce single admin rule
+    if (role === "admin") {
+      // Check if an admin already exists
+      const adminAlreadyExists = await adminExists();
+      if (adminAlreadyExists) {
+        return res.status(400).json({
+          message:
+            "An admin account already exists. Only one admin is allowed in the system.",
+        });
+      }
+
+      // Check if the email matches the predefined admin email
+      if (email !== process.env.ADMIN_EMAIL) {
+        return res.status(400).json({
+          message:
+            "Invalid admin email. Contact system administrator for admin access.",
+        });
+      }
     }
 
     // Check if Firebase services are available

@@ -8,8 +8,9 @@ const ensureCollections = async () => {
     "disasters",
     "donations",
     "transactions",
-    "vendors",
     "beneficiaries",
+    "disaster_requests",
+    "notifications",
     "audit_logs",
   ];
 

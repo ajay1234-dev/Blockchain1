@@ -4,7 +4,6 @@ const {
   initiateTokenTransfer,
   createDisasterEvent,
   approveBeneficiary,
-  approveVendor,
 } = require("../controllers/blockchain.controller");
 const { authenticateToken } = require("../middleware/authMiddleware");
 const { authorizeRoles } = require("../middleware/roleMiddleware");
@@ -29,12 +28,6 @@ router.post(
   authenticateToken,
   authorizeRoles("admin"),
   approveBeneficiary
-);
-router.post(
-  "/approve/vendor",
-  authenticateToken,
-  authorizeRoles("admin"),
-  approveVendor
 );
 
 module.exports = router;

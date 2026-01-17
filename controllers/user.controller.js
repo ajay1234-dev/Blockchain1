@@ -138,17 +138,35 @@ const updateUserRole = async (req, res) => {
     const { role } = req.body;
 
     // Validate role
-    const validRoles = ["admin", "donor", "beneficiary", "vendor"];
+    const validRoles = ["admin", "donor", "beneficiary"];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
-        message: "Invalid role. Must be admin, donor, beneficiary, or vendor",
+        message: "Invalid role. Must be admin, donor, or beneficiary",
       });
     }
+
     const userRef = firestore.collection("users").doc(id);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    // Enforce single admin rule
+    if (role === "admin") {
+      // Check if an admin already exists
+      const adminSnapshot = await firestore
+        .collection("users")
+        .where("role", "==", "admin")
+        .limit(1)
+        .get();
+
+      if (!adminSnapshot.empty) {
+        return res.status(400).json({
+          message:
+            "An admin account already exists. Only one admin is allowed in the system.",
+        });
+      }
     }
 
     // Update user role
@@ -181,10 +199,84 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+// Delete a user
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const admin = req.user;
+
+    // Get user to delete
+    const userToDeleteRef = firestore.collection("users").doc(id);
+    const userToDeleteDoc = await userToDeleteRef.get();
+
+    if (!userToDeleteDoc.exists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userToDelete = userToDeleteDoc.data();
+
+    // Prevent admin from deleting themselves
+    if (admin.uid === id) {
+      return res
+        .status(400)
+        .json({ message: "Admin cannot delete their own account" });
+    }
+
+    // Prevent deletion of another admin (since we only allow one admin)
+    if (userToDelete.role === "admin") {
+      return res.status(400).json({ message: "Cannot delete admin account" });
+    }
+
+    // Delete user from Firestore
+    await userToDeleteRef.delete();
+
+    // Delete user from Firebase Auth
+    try {
+      await auth.deleteUser(id);
+    } catch (authError) {
+      console.error("Error deleting user from Firebase Auth:", authError);
+      // Continue with the operation even if auth deletion fails
+    }
+
+    // Also delete any related data (beneficiaries, notifications, etc.)
+    try {
+      // Delete from beneficiaries collection if exists
+      const beneficiaryRef = firestore.collection("beneficiaries").doc(id);
+      await beneficiaryRef.delete();
+    } catch (error) {
+      console.error("Error deleting beneficiary data:", error);
+    }
+
+    try {
+      // Delete any related notifications
+      const notificationsSnapshot = await firestore
+        .collection("notifications")
+        .where("userId", "==", id)
+        .get();
+
+      const batch = firestore.batch();
+      notificationsSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error deleting notifications:", error);
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res
+      .status(500)
+      .json({ message: "Error deleting user", error: error.message });
+  }
+};
+
 module.exports = {
   getCurrentUser,
   updateUser,
   getAllUsers,
   getUserById,
   updateUserRole,
+  deleteUser,
 };

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 const AdminDashboard = ({ user }) => {
-  const [users, setUsers] = useState([]);
   const [disasters, setDisasters] = useState([]);
+  const [disasterRequests, setDisasterRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [userCount, setUserCount] = useState(0);
   const [newDisaster, setNewDisaster] = useState({ name: "", description: "" });
   const [approveForm, setApproveForm] = useState({
     type: "beneficiary",
@@ -13,11 +15,30 @@ const AdminDashboard = ({ user }) => {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchDisasterRequests();
   }, []);
+
+  // Check for new disaster requests and show notification
+  useEffect(() => {
+    if (disasterRequests.length > 0) {
+      const pendingRequests = disasterRequests.filter(
+        (request) => request.status === "pending"
+      );
+      if (pendingRequests.length > 0) {
+        // Show a notification for new disaster requests
+        const notificationText = `You have ${pendingRequests.length} new disaster request(s) to review`;
+        // In a real app, you might use a proper notification library, but for now we'll use alert
+        // Only show the notification if we just loaded the requests (not on every render)
+        if (requestsLoading === false && disasterRequests.length > 0) {
+          // We'll show the notification in the UI rather than using alert to be less intrusive
+        }
+      }
+    }
+  }, [disasterRequests, requestsLoading]);
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch users
+      // Fetch user count
       const usersResponse = await fetch("/api/user", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -26,7 +47,7 @@ const AdminDashboard = ({ user }) => {
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
-        setUsers(usersData);
+        setUserCount(usersData.length);
       }
 
       // Fetch disasters
@@ -69,18 +90,95 @@ const AdminDashboard = ({ user }) => {
         alert(data.message || "Failed to create disaster event");
       }
     } catch (error) {
-      toast.error("Error creating disaster event");
+      alert("Error creating disaster event");
       console.error("Error creating disaster:", error);
+    }
+  };
+
+  const fetchDisasterRequests = async () => {
+    try {
+      setRequestsLoading(true);
+      const response = await fetch("/api/disaster-request", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDisasterRequests(data);
+      }
+    } catch (error) {
+      console.error("Error fetching disaster requests:", error);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  const handleUpdateDisasterRequest = async (requestId, status) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to update this request status to ${status}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/disaster-request/${requestId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Request status updated to ${status}`);
+        fetchDisasterRequests(); // Refresh requests
+      } else {
+        alert(data.message || `Failed to update request status`);
+      }
+    } catch (error) {
+      alert(`Error updating request status`);
+      console.error(`Error updating request status:`, error);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const handleApproveEntity = async (e) => {
     e.preventDefault();
+
+    // Only beneficiary approval is supported after vendor role removal
+    if (approveForm.type !== "beneficiary") {
+      alert("Only beneficiary approval is supported");
+      return;
+    }
+
     try {
-      const endpoint =
-        approveForm.type === "beneficiary"
-          ? "/api/blockchain/approve/beneficiary"
-          : "/api/blockchain/approve/vendor";
+      const endpoint = "/api/blockchain/approve/beneficiary";
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -117,11 +215,48 @@ const AdminDashboard = ({ user }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
+      {/* Notification Banner for Pending Disaster Requests */}
+      {disasterRequests.length > 0 &&
+        (() => {
+          const pendingRequests = disasterRequests.filter(
+            (request) => request.status === "pending"
+          );
+          if (pendingRequests.length > 0) {
+            return (
+              <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 backdrop-blur-sm rounded-xl p-4 border border-amber-500/30">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-amber-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-amber-300">
+                      <span className="font-medium">Attention!</span> You have{" "}
+                      {pendingRequests.length} pending disaster request
+                      {pendingRequests.length > 1 ? "s" : ""} to review.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-md p-6 border border-blue-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-blue-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl text-white shadow-lg shadow-blue-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -132,21 +267,23 @@ const AdminDashboard = ({ user }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Total Users
               </h3>
-              <p className="text-3xl font-bold text-gray-900">{users.length}</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                {userCount}
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl shadow-md p-6 border border-red-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-red-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl text-white shadow-lg shadow-red-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -162,18 +299,18 @@ const AdminDashboard = ({ user }) => {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Active Disasters
               </h3>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
                 {disasters.length}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-md p-6 border border-purple-100">
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-purple-500 rounded-xl text-white">
+            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white shadow-lg shadow-purple-500/20">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -189,19 +326,21 @@ const AdminDashboard = ({ user }) => {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 Blockchain Records
               </h3>
-              <p className="text-3xl font-bold text-gray-900">0</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                0
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Create Disaster Event Form */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 border border-gray-100">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg text-white">
+          <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg text-white shadow-lg shadow-red-500/20">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -216,13 +355,13 @@ const AdminDashboard = ({ user }) => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
             Create Disaster Event
           </h3>
         </div>
         <form onSubmit={handleCreateDisaster} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Event Name
             </label>
             <input
@@ -231,12 +370,12 @@ const AdminDashboard = ({ user }) => {
               onChange={(e) =>
                 setNewDisaster({ ...newDisaster, name: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Description
             </label>
             <textarea
@@ -244,14 +383,14 @@ const AdminDashboard = ({ user }) => {
               onChange={(e) =>
                 setNewDisaster({ ...newDisaster, description: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               rows="3"
               required
             />
           </div>
           <button
             type="submit"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+            className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-200 shadow-lg shadow-red-500/20 font-medium"
           >
             Create Disaster Event
           </button>
@@ -259,9 +398,9 @@ const AdminDashboard = ({ user }) => {
       </div>
 
       {/* Approve Beneficiaries/Vendors */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 border border-gray-100">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white">
+          <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white shadow-lg shadow-emerald-500/20">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -276,8 +415,8 @@ const AdminDashboard = ({ user }) => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-gray-900">
-            Approve Beneficiaries/Vendors
+          <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Approve Beneficiaries
           </h3>
         </div>
         <form
@@ -285,7 +424,7 @@ const AdminDashboard = ({ user }) => {
           className="grid grid-cols-1 md:grid-cols-4 gap-5"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Type
             </label>
             <select
@@ -293,14 +432,16 @@ const AdminDashboard = ({ user }) => {
               onChange={(e) =>
                 setApproveForm({ ...approveForm, type: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
             >
               <option value="beneficiary">Beneficiary</option>
-              <option value="vendor">Vendor</option>
             </select>
+            <p className="text-xs text-gray-400 mt-1">
+              Note: Vendor approval is no longer available
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               User ID
             </label>
             <input
@@ -309,13 +450,13 @@ const AdminDashboard = ({ user }) => {
               onChange={(e) =>
                 setApproveForm({ ...approveForm, id: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               placeholder="Enter user ID"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
               Event ID
             </label>
             <input
@@ -324,7 +465,7 @@ const AdminDashboard = ({ user }) => {
               onChange={(e) =>
                 setApproveForm({ ...approveForm, eventId: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition duration-200 bg-white"
+              className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm focus:shadow-lg text-white placeholder-gray-400"
               placeholder="Enter event ID"
               required
             />
@@ -332,7 +473,7 @@ const AdminDashboard = ({ user }) => {
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-3 rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-3 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-500/20 font-medium"
             >
               Approve
             </button>
@@ -340,11 +481,11 @@ const AdminDashboard = ({ user }) => {
         </form>
       </div>
 
-      {/* User Management */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 border border-gray-100">
+      {/* Disaster Requests */}
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg text-white">
+            <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg text-white shadow-lg shadow-amber-500/20">
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -355,111 +496,161 @@ const AdminDashboard = ({ user }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">User Management</h3>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+              Disaster Requests
+            </h3>
           </div>
-          <div className="text-sm text-gray-500">{users.length} users</div>
+          <div className="text-sm text-gray-400">
+            {disasterRequests.length} requests
+          </div>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Wallet
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user, index) => (
-                <tr
-                  key={user.uid}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-dashed border-blue-300 rounded-xl flex items-center justify-center">
-                        <span className="text-blue-600 font-medium">
-                          {user.name?.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          ID: {user.uid?.substring(0, 8)}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
-                    <div className="text-sm text-gray-500">
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : "N/A"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                      ${
-                        user.role === "admin"
-                          ? "bg-red-100 text-red-800"
-                          : user.role === "donor"
-                          ? "bg-green-100 text-green-800"
-                          : user.role === "beneficiary"
-                          ? "bg-blue-100 text-blue-800"
-                          : user.role === "vendor"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
-                      {user.walletAddress
-                        ? user.walletAddress.substring(0, 6) +
-                          "..." +
-                          user.walletAddress.substring(
-                            user.walletAddress.length - 4
-                          )
-                        : "N/A"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 p-2 rounded-lg transition-colors duration-200">
-                        Edit
-                      </button>
-                      <button className="text-red-600 hover:text-red-900 hover:bg-red-50 p-2 rounded-lg transition-colors duration-200">
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        {requestsLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+          </div>
+        ) : disasterRequests.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="bg-gray-700/50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 border border-gray-600/50">
+              <svg
+                className="h-8 w-8 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-300 mb-1">
+              No disaster requests
+            </h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              There are currently no disaster requests from beneficiaries.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-gray-700/50 bg-gray-800/30">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Severity
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Requested By
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {disasterRequests.map((request) => (
+                  <tr
+                    key={request.id}
+                    className="transition-colors duration-150 hover:bg-gray-700/30"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">
+                        {new Date(request.createdAt).toLocaleDateString()}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(request.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-300">
+                        {request.name}
+                      </div>
+                      <div
+                        className="text-sm text-gray-500 max-w-xs truncate"
+                        title={request.description}
+                      >
+                        {request.description}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {request.location}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      <span className="capitalize">{request.severity}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          request.status
+                        )}`}
+                      >
+                        {request.status.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-300">
+                        {request.requestedByName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {request.requestedByEmail}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() =>
+                            handleUpdateDisasterRequest(request.id, "approved")
+                          }
+                          disabled={request.status !== "pending"}
+                          className={`px-3 py-1 rounded-lg text-sm ${
+                            request.status === "pending"
+                              ? "bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-600/30"
+                              : "bg-gray-700/50 text-gray-500 cursor-not-allowed border border-gray-600/50"
+                          }`}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleUpdateDisasterRequest(request.id, "rejected")
+                          }
+                          disabled={request.status !== "pending"}
+                          className={`px-3 py-1 rounded-lg text-sm ${
+                            request.status === "pending"
+                              ? "bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-600/30"
+                              : "bg-gray-700/50 text-gray-500 cursor-not-allowed border border-gray-600/50"
+                          }`}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

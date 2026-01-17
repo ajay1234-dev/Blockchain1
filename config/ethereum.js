@@ -15,7 +15,6 @@ const emergencyReliefStablecoinABI = [
 const emergencyReliefManagerABI = [
   "function createDisasterEvent(string calldata name, string calldata description) returns (uint256)",
   "function approveBeneficiary(address beneficiary, uint256 eventId) returns (bool)",
-  "function approveVendor(address vendor, uint256 eventId) returns (bool)",
 ];
 
 function initializeEthereum() {

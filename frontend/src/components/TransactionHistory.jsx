@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { getUserTransactionHistory } from "../utils/transactions";
 import { toast } from "react-toastify";
 
 const TransactionHistory = () => {
@@ -15,7 +14,25 @@ const TransactionHistory = () => {
     try {
       setLoading(true);
       setError(null); // Reset error state
-      const data = await getUserTransactionHistory();
+
+      // Get user's token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch("/api/transaction/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load transaction history");
+      }
+
       setTransactions(data.transactions || []);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -31,6 +48,9 @@ const TransactionHistory = () => {
   };
 
   const getTransactionColor = (purpose) => {
+    if (!purpose) {
+      return "bg-gray-100 text-gray-800"; // Default color for undefined purpose
+    }
     switch (purpose.toLowerCase()) {
       case "donation":
         return "bg-green-100 text-green-800";
@@ -161,6 +181,9 @@ const TransactionHistory = () => {
             />
           </svg>
           <p className="text-gray-600">No transactions found</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Your transaction history will appear here
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto">

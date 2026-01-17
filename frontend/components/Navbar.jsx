@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  BellIcon,
   UserCircleIcon,
   ChevronDownIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
+
+import Notifications from "../src/components/Notifications";
 
 const Navbar = ({ user, setIsAuthenticated }) => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -96,11 +97,11 @@ const Navbar = ({ user, setIsAuthenticated }) => {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-lg border-b border-gray-700/50 px-6 py-4 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/dashboard" className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-7 w-7"
@@ -117,10 +118,10 @@ const Navbar = ({ user, setIsAuthenticated }) => {
               </svg>
             </div>
             <div>
-              <span className="text-xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 Emergency Relief
               </span>
-              <p className="text-xs text-gray-500 hidden md:block -mt-1">
+              <p className="text-xs text-gray-400 hidden md:block -mt-1">
                 Blockchain Platform
               </p>
             </div>
@@ -133,10 +134,10 @@ const Navbar = ({ user, setIsAuthenticated }) => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={connectWallet}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${
                   walletConnected
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg"
-                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+                    ? "bg-gradient-to-r from-emerald-600/80 to-teal-600/80 text-white shadow-lg shadow-emerald-500/20"
+                    : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700"
                 }`}
               >
                 <WalletIcon className="h-4 w-4" />
@@ -152,20 +153,17 @@ const Navbar = ({ user, setIsAuthenticated }) => {
             </div>
 
             {walletConnected && (
-              <div className="text-sm text-gray-600 hidden md:flex items-center space-x-1.5 bg-gray-100 px-3 py-1.5 rounded-xl">
+              <div className="text-sm text-gray-300 hidden md:flex items-center space-x-1.5 bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 <span>{walletBalance} RELIEF</span>
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-lg">
+                <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-lg border border-indigo-500/30">
                   Sepolia
                 </span>
               </div>
             )}
           </div>
 
-          <button className="p-2 text-gray-500 hover:text-blue-600 relative transition-colors duration-200">
-            <BellIcon className="h-6 w-6" />
-            <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-500 border border-white"></span>
-          </button>
+          <Notifications user={user} />
 
           <div className="relative">
             <button
@@ -173,19 +171,17 @@ const Navbar = ({ user, setIsAuthenticated }) => {
               className="flex items-center space-x-2 focus:outline-none transition-transform duration-200 hover:scale-105"
             >
               <div className="relative">
-                <div className="bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-dashed border-blue-300 rounded-xl w-10 h-10 flex items-center justify-center">
-                  <UserCircleIcon className="h-6 w-6 text-blue-600" />
+                <div className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 border border-gray-600/50 rounded-lg w-10 h-10 flex items-center justify-center shadow-inner">
+                  <UserCircleIcon className="h-6 w-6 text-indigo-400" />
                 </div>
-                <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                <span className="absolute -bottom-1 -right-1 bg-emerald-500/80 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-gray-800">
                   {user?.role?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="text-left hidden md:block">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.name}
-                </p>
+                <p className="text-sm font-medium text-white">{user?.name}</p>
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 capitalize">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 capitalize border border-indigo-500/30">
                     {user?.role}
                   </span>
                   <ChevronDownIcon className="h-4 w-4 text-gray-400" />
@@ -194,15 +190,15 @@ const Navbar = ({ user, setIsAuthenticated }) => {
             </button>
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 z-50 border border-gray-100 overflow-hidden">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+              <div className="absolute right-0 mt-2 w-56 bg-gradient-to-b from-gray-800/90 to-gray-900/90 backdrop-blur-lg rounded-xl shadow-2xl py-2 z-50 border border-gray-700/50 overflow-hidden">
+                <div className="px-4 py-2 border-b border-gray-700/50">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">
                     Account
                   </p>
                 </div>
                 <Link
                   to="/dashboard"
-                  className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r from-blue-50 to-indigo-50 transition-colors duration-150"
+                  className="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gradient-to-r from-indigo-600/20 to-purple-600/20 hover:text-white transition-colors duration-150"
                 >
                   <svg
                     className="h-5 w-5 mr-3 text-gray-400"
@@ -221,7 +217,7 @@ const Navbar = ({ user, setIsAuthenticated }) => {
                 </Link>
                 <Link
                   to="/profile"
-                  className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r from-blue-50 to-indigo-50 transition-colors duration-150"
+                  className="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gradient-to-r from-indigo-600/20 to-purple-600/20 hover:text-white transition-colors duration-150"
                 >
                   <svg
                     className="h-5 w-5 mr-3 text-gray-400"
@@ -240,7 +236,7 @@ const Navbar = ({ user, setIsAuthenticated }) => {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r from-red-50 to-pink-50 transition-colors duration-150"
+                  className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gradient-to-r from-red-600/20 to-pink-600/20 hover:text-white transition-colors duration-150"
                 >
                   <svg
                     className="h-5 w-5 mr-3 text-gray-400"

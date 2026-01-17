@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard.jsx";
 import DonorDashboard from "./DonorDashboard.jsx";
 import BeneficiaryDashboard from "./BeneficiaryDashboard.jsx";
-import VendorDashboard from "./VendorDashboard.jsx";
 
 const Dashboard = ({ user }) => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -54,8 +53,7 @@ const Dashboard = ({ user }) => {
         return <DonorDashboard user={user} />;
       case "beneficiary":
         return <BeneficiaryDashboard user={user} />;
-      case "vendor":
-        return <VendorDashboard user={user} />;
+
       default:
         return (
           <div className="text-center py-12">
@@ -71,10 +69,12 @@ const Dashboard = ({ user }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {user?.name}!</p>
+    <div className="space-y-6 p-4">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-gray-700/50">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-2">
+          Dashboard
+        </h1>
+        <p className="text-gray-400">Welcome back, {user?.name}!</p>
       </div>
 
       {renderDashboardContent()}

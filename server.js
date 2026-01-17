@@ -18,6 +18,9 @@ const reliefRoutes = require("./routes/relief.routes");
 const transactionRoutes = require("./routes/transaction.routes");
 const serviceRoutes = require("./routes/service.routes");
 const walletRoutes = require("./routes/wallet.routes");
+const disasterRequestRoutes = require("./routes/disasterRequest.routes");
+const notificationRoutes = require("./routes/notification.routes");
+const settingsRoutes = require("./routes/settings.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -91,6 +94,9 @@ app.use("/api/relief", reliefRoutes);
 app.use("/api/transaction", transactionRoutes);
 app.use("/api/service", serviceRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/disaster-request", disasterRequestRoutes);
+app.use("/api/notification", notificationRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Serve React app for all other routes
 app.get("*", (req, res) => {

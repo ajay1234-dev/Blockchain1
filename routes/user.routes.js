@@ -5,6 +5,7 @@ const {
   getAllUsers,
   getUserById,
   updateUserRole,
+  deleteUser,
 } = require("../controllers/user.controller");
 const { authenticateToken } = require("../middleware/authMiddleware");
 const { authorizeRoles } = require("../middleware/roleMiddleware");
@@ -23,5 +24,6 @@ router.put(
   authorizeRoles("admin"),
   updateUserRole
 );
+router.delete("/:id", authenticateToken, authorizeRoles("admin"), deleteUser);
 
 module.exports = router;

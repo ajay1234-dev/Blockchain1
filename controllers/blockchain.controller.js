@@ -5,6 +5,20 @@ const {
   getManagerContract,
 } = require("../config/ethereum");
 
+// Function to check if user is admin
+const isAdmin = async (userId) => {
+  try {
+    const userDoc = await firestore.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      return false;
+    }
+    return userDoc.data().role === "admin";
+  } catch (error) {
+    console.error("Error checking if user is admin:", error);
+    return false;
+  }
+};
+
 // Get wallet balance
 const getWalletBalance = async (req, res) => {
   try {
@@ -39,7 +53,7 @@ const getWalletBalance = async (req, res) => {
 const initiateTokenTransfer = async (req, res) => {
   try {
     const { to, amount } = req.body;
-    const user = req.currentUser;
+    const user = req.user;
 
     if (!to || !amount) {
       return res
@@ -97,7 +111,15 @@ const initiateTokenTransfer = async (req, res) => {
 const createDisasterEvent = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const admin = req.currentUser;
+    const admin = req.user;
+
+    // Check if user is admin
+    const isAdminUser = await isAdmin(admin.uid);
+    if (!isAdminUser) {
+      return res.status(403).json({
+        message: "Only admin users can create disaster events",
+      });
+    }
 
     if (!name || !description) {
       return res.status(400).json({
@@ -107,12 +129,19 @@ const createDisasterEvent = async (req, res) => {
 
     const managerContract = getManagerContract();
 
+    // Get admin's name from users collection
+    const adminDoc = await firestore.collection("users").doc(admin.uid).get();
+    const adminName = adminDoc.exists
+      ? adminDoc.data().name || adminDoc.data().email
+      : "Unknown Admin";
+
     // In a real implementation, this would call the smart contract
     // For now, we'll simulate the creation in Firestore
     const disasterDoc = await firestore.collection("disasters").add({
       name,
       description,
       createdBy: admin.uid,
+      createdByName: adminName, // Store admin's name as well
       createdAt: new Date().toISOString(),
       status: "active",
     });
@@ -135,7 +164,15 @@ const createDisasterEvent = async (req, res) => {
 const approveBeneficiary = async (req, res) => {
   try {
     const { beneficiaryId, eventId } = req.body;
-    const admin = req.currentUser;
+    const admin = req.user;
+
+    // Check if user is admin
+    const isAdminUser = await isAdmin(admin.uid);
+    if (!isAdminUser) {
+      return res.status(403).json({
+        message: "Only admin users can approve beneficiaries",
+      });
+    }
 
     if (!beneficiaryId || !eventId) {
       return res
@@ -191,67 +228,9 @@ const approveBeneficiary = async (req, res) => {
   }
 };
 
-// Approve a vendor for a disaster event
-const approveVendor = async (req, res) => {
-  try {
-    const { vendorId, eventId } = req.body;
-    const admin = req.currentUser;
-
-    if (!vendorId || !eventId) {
-      return res
-        .status(400)
-        .json({ message: "Vendor ID and Event ID are required" });
-    }
-
-    // Check if vendor exists
-    const vendorDoc = await firestore.collection("users").doc(vendorId).get();
-    if (!vendorDoc.exists) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
-
-    const vendor = vendorDoc.data();
-    if (vendor.role !== "vendor") {
-      return res.status(400).json({ message: "User is not a vendor" });
-    }
-
-    // Check if disaster event exists
-    const disasterDoc = await firestore
-      .collection("disasters")
-      .doc(eventId)
-      .get();
-    if (!disasterDoc.exists) {
-      return res.status(404).json({ message: "Disaster event not found" });
-    }
-
-    // Update vendor status
-    await firestore.collection("vendors").doc(vendorId).set(
-      {
-        userId: vendorId,
-        eventId,
-        approved: true,
-        approvedBy: admin.uid,
-        approvedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-
-    res.status(200).json({
-      message: "Vendor approved successfully",
-      vendorId,
-      eventId,
-    });
-  } catch (error) {
-    console.error("Error approving vendor:", error);
-    res
-      .status(500)
-      .json({ message: "Error approving vendor", error: error.message });
-  }
-};
-
 module.exports = {
   getWalletBalance,
   initiateTokenTransfer,
   createDisasterEvent,
   approveBeneficiary,
-  approveVendor,
 };

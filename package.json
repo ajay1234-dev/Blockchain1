@@ -10,7 +10,8 @@
     "dev:client": "cd frontend && npm run dev",
     "build": "npm run build-client",
     "build-client": "cd frontend && npm run build",
-    "install-client": "cd frontend && npm install"
+    "install-client": "cd frontend && npm install",
+    "setup-admin": "node setup-admin.js"
   },
   "keywords": [
     "blockchain",
@@ -25,6 +26,7 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
